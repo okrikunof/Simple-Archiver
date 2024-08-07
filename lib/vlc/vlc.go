@@ -5,20 +5,7 @@ import (
 	"strconv"
 	"strings"
 	"unicode"
-	"unicode/utf8"
 )
-
-type BinaryChunk string
-
-type BinaryChunks []BinaryChunk
-
-type HexChunk string
-
-type HexChunks []HexChunk
-
-type encodingTable map[rune]string
-
-const chunkSize = 8
 
 func Encode(str string) string {
 	str = prepareText(str)
@@ -28,9 +15,51 @@ func Encode(str string) string {
 	return chunks.ToHex().ToString()
 }
 
-func (hcs HexChunks) ToString() string {
-	const sep = " "
+func Decode(encodedText string) string {
+	//hChunks := NewHexChunks(encodedText)
+	//
+	//bChunks := hChunks.ToBinary()
+	//
+	//bString := bChunks.Join()
 
+	return ""
+}
+
+func (bcs BinaryChunks) Join() string {
+	var buf strings.Builder
+
+	for _, bc := range bcs {
+		buf.WriteString(string(bc))
+	}
+
+	return buf.String()
+}
+
+func (hcs HexChunks) ToBinary() BinaryChunks {
+	res := make(BinaryChunks, 0, len(hcs))
+
+	for _, chunk := range hcs {
+		bChunk := chunk.ToBinary()
+
+		res = append(res, bChunk)
+	}
+
+	return res
+}
+
+func (hc HexChunk) ToBinary() BinaryChunk {
+	num, err := strconv.ParseUint(string(hc), 16, chunkSize)
+	if err != nil {
+		panic("can't convert hex chunk to binary" + err.Error())
+	}
+
+	res := fmt.Sprintf("%08b", num)
+
+	return BinaryChunk(res)
+
+}
+
+func (hcs HexChunks) ToString() string {
 	switch len(hcs) {
 	case 0:
 		return ""
@@ -43,7 +72,7 @@ func (hcs HexChunks) ToString() string {
 	buf.WriteString(string(hcs[0]))
 
 	for _, hc := range hcs[1:] {
-		buf.WriteString(sep)
+		buf.WriteString(hexChunksSeparator)
 		buf.WriteString(string(hc))
 	}
 
@@ -75,39 +104,6 @@ func (bc BinaryChunk) ToHex() HexChunk {
 	}
 
 	return HexChunk(res)
-}
-
-func splitByChunks(bStr string, chunkSize int) BinaryChunks {
-	strLen := utf8.RuneCountInString(bStr)
-
-	chunksCount := strLen / chunkSize
-
-	if strLen/chunkSize != 0 {
-		chunksCount++
-	}
-
-	res := make(BinaryChunks, 0, chunksCount)
-
-	var buf strings.Builder
-
-	for i, ch := range bStr {
-		buf.WriteString(string(ch))
-
-		if (i+1)%chunkSize == 0 {
-			res = append(res, BinaryChunk(buf.String()))
-			buf.Reset()
-		}
-	}
-
-	if buf.Len() != 0 {
-		lastChunk := buf.String()
-
-		lastChunk += strings.Repeat("0", chunkSize-len(lastChunk))
-
-		res = append(res, BinaryChunk(lastChunk))
-	}
-
-	return res
 }
 
 func encodeBin(str string) string {

@@ -43,10 +43,10 @@ func unpack(_ *cobra.Command, args []string) {
 	}
 }
 
-func unpackedFileName(path string, ext string) string {
+func unpackedFileName(path string) string {
 	fileName := filepath.Base(path)
 
-	return strings.TrimSuffix(fileName, filepath.Ext(fileName)) + "." + packedExtension
+	return strings.TrimSuffix(fileName, filepath.Ext(fileName)) + "." + unpackedExtension
 }
 
 func init() {

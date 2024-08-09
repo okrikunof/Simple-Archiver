@@ -1,6 +1,8 @@
 package vlc
 
 import (
+	"fmt"
+	"strconv"
 	"strings"
 	"unicode/utf8"
 )
@@ -9,26 +11,41 @@ type BinaryChunk string
 
 type BinaryChunks []BinaryChunk
 
-type HexChunk string
-
-type HexChunks []HexChunk
-
 type encodingTable map[rune]string
 
 const chunkSize = 8
 
-const hexChunksSeparator = " "
+func NewBinChunks(data []byte) BinaryChunks {
+	res := make(BinaryChunks, 0, len(data))
 
-func NewHexChunks(str string) HexChunks {
-	parts := strings.Split(str, hexChunksSeparator)
-
-	res := make(HexChunks, 0, len(parts))
-
-	for _, part := range parts {
-		res = append(res, HexChunk(part))
+	for _, part := range data {
+		res = append(res, NewBinChunk(part))
 	}
 
 	return res
+}
+
+func NewBinChunk(code byte) BinaryChunk {
+	return BinaryChunk(fmt.Sprintf("%08b", code))
+}
+
+func (bcs BinaryChunks) Bytes() []byte {
+	res := make([]byte, 0, len(bcs))
+
+	for _, bc := range bcs {
+		res = append(res, bc.Byte())
+	}
+
+	return res
+}
+
+func (bc BinaryChunk) Byte() byte {
+	num, err := strconv.ParseUint(string(bc), 2, chunkSize)
+	if err != nil {
+		panic("can't parse binary chunk: " + err.Error())
+	}
+
+	return byte(num)
 }
 
 func splitByChunks(bStr string, chunkSize int) BinaryChunks {

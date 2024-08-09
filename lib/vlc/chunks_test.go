@@ -32,24 +32,3 @@ func Test_splitByChunks(t *testing.T) {
 		})
 	}
 }
-
-func TestNewHexChunks(t *testing.T) {
-	tests := []struct {
-		name string
-		str  string
-		want HexChunks
-	}{
-		{
-			name: "base test",
-			str:  "001000000000000010000001000000000000",
-			want: HexChunks{"00100000", "00000000", "10000001", "00000000", "00000000"},
-		},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			if got := NewHexChunks(tt.str); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("NewHexChunks() = %v, want %v", got, tt.want)
-			}
-		})
-	}
-}

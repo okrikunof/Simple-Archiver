@@ -1,22 +1,20 @@
 package vlc
 
 import (
-	"fmt"
-	"strconv"
 	"strings"
 	"unicode"
 )
 
-func Encode(str string) string {
+func Encode(str string) []byte {
 	str = prepareText(str)
 
 	chunks := splitByChunks(encodeBin(str), chunkSize)
 
-	return chunks.ToHex().ToString()
+	return chunks.Bytes()
 }
 
-func Decode(encodedText string) string {
-	bString := NewHexChunks(encodedText).ToBinary().Join()
+func Decode(encodedData []byte) string {
+	bString := NewBinChunks(encodedData).Join()
 
 	dTree := getEncodingTable().DecodingTree()
 
@@ -31,77 +29,6 @@ func (bcs BinaryChunks) Join() string {
 	}
 
 	return buf.String()
-}
-
-func (hcs HexChunks) ToBinary() BinaryChunks {
-	res := make(BinaryChunks, 0, len(hcs))
-
-	for _, chunk := range hcs {
-		bChunk := chunk.ToBinary()
-
-		res = append(res, bChunk)
-	}
-
-	return res
-}
-
-func (hc HexChunk) ToBinary() BinaryChunk {
-	num, err := strconv.ParseUint(string(hc), 16, chunkSize)
-	if err != nil {
-		panic("can't convert hex chunk to binary" + err.Error())
-	}
-
-	res := fmt.Sprintf("%08b", num)
-
-	return BinaryChunk(res)
-
-}
-
-func (hcs HexChunks) ToString() string {
-	switch len(hcs) {
-	case 0:
-		return ""
-	case 1:
-		return string(hcs[0])
-	}
-
-	var buf strings.Builder
-
-	buf.WriteString(string(hcs[0]))
-
-	for _, hc := range hcs[1:] {
-		buf.WriteString(hexChunksSeparator)
-		buf.WriteString(string(hc))
-	}
-
-	return buf.String()
-}
-
-func (bcs BinaryChunks) ToHex() HexChunks {
-	res := make(HexChunks, 0, len(bcs))
-
-	for _, chunk := range bcs {
-		hexChunk := chunk.ToHex()
-
-		res = append(res, hexChunk)
-	}
-
-	return res
-}
-
-func (bc BinaryChunk) ToHex() HexChunk {
-	num, err := strconv.ParseUint(string(bc), 2, chunkSize)
-	if err != nil {
-		panic("can't convert binary chunks to hex chunks" + err.Error())
-	}
-
-	res := strings.ToUpper(fmt.Sprintf("%x", num))
-
-	if len(res) == 1 {
-		res = "0" + res
-	}
-
-	return HexChunk(res)
 }
 
 func encodeBin(str string) string {

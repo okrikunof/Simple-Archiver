@@ -16,13 +16,11 @@ func Encode(str string) string {
 }
 
 func Decode(encodedText string) string {
-	//hChunks := NewHexChunks(encodedText)
-	//
-	//bChunks := hChunks.ToBinary()
-	//
-	//bString := bChunks.Join()
+	bString := NewHexChunks(encodedText).ToBinary().Join()
 
-	return ""
+	dTree := getEncodingTable().DecodingTree()
+
+	return exportText(dTree.Decode(bString))
 }
 
 func (bcs BinaryChunks) Join() string {
@@ -157,6 +155,31 @@ func getEncodingTable() encodingTable {
 		'q': "000000000001",
 		'z': "000000000000",
 	}
+}
+
+func exportText(str string) string {
+	var buf strings.Builder
+
+	var isCapital bool
+
+	for _, ch := range str {
+		if isCapital {
+			buf.WriteRune(unicode.ToUpper(ch))
+			isCapital = false
+
+			continue
+		}
+
+		if ch == '!' {
+			isCapital = true
+
+			continue
+		} else {
+			buf.WriteRune(ch)
+		}
+	}
+
+	return buf.String()
 }
 
 func prepareText(str string) string {

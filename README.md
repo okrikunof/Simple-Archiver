@@ -9,7 +9,7 @@ This archiver tool allows you to compress `.txt` files using VLC compression.
 To pack a `.txt` file, use the following command:
 
 ```bash
-./Archiver pack vlc test.txt
+./Archiver pack -m vlc test.txt
 ```
 For example, given a file test.txt with the content:
 ```txt
@@ -23,6 +23,6 @@ The command will generate a `test.vlc` binary file. This file will be 5 bytes sm
 
 To unpack a `.vlc` file back to its original `.txt` format, use the following command:
 ```bash
-./Archiver unpack vlc test.vlc
+./Archiver unpack -m vlc test.vlc
 ```
 This will restore the original content of the file.
